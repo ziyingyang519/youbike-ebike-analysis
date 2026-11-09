@@ -1,0 +1,44 @@
+---
+title: "03 站點型態"
+author: "B"
+---
+
+研究問題 2：各站點的電輔車使用比例與時間型態可以分成哪幾類？
+
+```{python}
+#| label: setup
+from pathlib import Path
+import pandas as pd
+
+ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
+trips = pd.read_parquet(ROOT / "data" / "processed" / "trips.parquet")
+SEED = 42
+```
+
+## 建構站點使用矩陣
+
+每列一個站點，欄位為平日／假日 × 24 小時的電輔車借車比例。
+
+```{python}
+ebike_share = (
+    trips.assign(is_ebike=trips["bike_type"].eq("ebike"))
+    .groupby(["rent_station", "day_type", "hour"])["is_ebike"]
+    .mean()
+    .unstack(["day_type", "hour"])
+)
+ebike_share.shape
+```
+
+TODO：排除借車量太少的站點，處理缺值。
+
+## PCA
+
+TODO
+
+## 分群（階層式、K-means）與 MDS
+
+TODO：輪廓係數選群數，bootstrap 檢查穩定度。
+
+## CA：行政區 × 站點類型
+
+TODO

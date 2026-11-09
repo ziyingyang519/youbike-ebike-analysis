@@ -1,0 +1,37 @@
+project:
+  type: website
+  output-dir: docs          # GitHub Pages serves this folder
+  render:
+    - index.qmd
+    - notebooks/*.qmd
+
+website:
+  title: "YouBike 電輔車與一般車使用差異"
+  navbar:
+    left:
+      - href: index.qmd
+        text: 首頁
+      - href: notebooks/01_data_prep.qmd
+        text: 資料整理
+      - href: notebooks/02_trip_level.qmd
+        text: 旅次分析
+      - href: notebooks/03_station_patterns.qmd
+        text: 站點型態
+      - href: notebooks/04_geography_cca.qmd
+        text: 地理條件
+    right:
+      - href: AI_DISCLOSURE.md
+        text: AI 使用聲明
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    code-fold: true
+    code-tools: true
+    lang: zh-Hant
+
+execute:
+  freeze: auto              # only re-run notebooks whose code changed
+  echo: true
+  warning: false

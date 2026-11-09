@@ -1,0 +1,64 @@
+---
+title: "01 資料整理"
+author: "A"
+---
+
+```{python}
+#| label: setup
+import sys
+from pathlib import Path
+
+ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
+sys.path.insert(0, str(ROOT / "src"))
+
+import pandas as pd
+from youbike import load_rentals, prepare_stations, add_trip_features, station_match_report
+
+RAW = ROOT / "data" / "raw"
+EXTERNAL = ROOT / "data" / "external"
+PROCESSED = ROOT / "data" / "processed"
+```
+
+## 讀取租借紀錄
+
+先執行 `python scripts/download_data.py --month 2026-03` 下載資料到 `data/raw/`。
+
+```{python}
+files = sorted(RAW.glob("*.csv"))
+trips = load_rentals(files)
+print(f"讀入 {len(trips):,} 筆，刪除 {trips.attrs['n_dropped']:,} 筆無效紀錄")
+trips.head()
+```
+
+## 車種分布
+
+```{python}
+trips["bike_type"].value_counts().to_frame("n").assign(share=lambda d: d["n"] / d["n"].sum())
+```
+
+```{python}
+n_all = trips["rent_station"].nunique()
+n_ebike = trips.loc[trips["bike_type"] == "ebike", "rent_station"].nunique()
+print(f"站點數：{n_all}，有電輔車借出的站點：{n_ebike}")
+```
+
+## 站名比對
+
+```{python}
+stations = prepare_stations(pd.read_csv(EXTERNAL / "stations.csv"))
+missing = station_match_report(trips, stations)
+print(f"對不上的站名：{len(missing)} 個，涉及 {missing['n_trips'].sum():,} 筆旅次")
+missing.head(20)
+```
+
+## 旅次特徵
+
+```{python}
+trips_f = add_trip_features(trips, stations)
+trips_f[["distance_km", "duration_min", "speed_kmh", "hour", "day_type"]].describe(include="all")
+```
+
+```{python}
+PROCESSED.mkdir(parents=True, exist_ok=True)
+trips_f.to_parquet(PROCESSED / "trips.parquet", index=False)
+```

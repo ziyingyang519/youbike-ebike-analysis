@@ -1,0 +1,53 @@
+---
+title: "02 旅次分析：電輔車與一般車"
+author: "A"
+---
+
+研究問題 1：電輔車和一般車的旅次特徵是否顯著不同？哪些特徵最能區分兩者？
+
+```{python}
+#| label: setup
+from pathlib import Path
+import pandas as pd
+
+ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
+trips = pd.read_parquet(ROOT / "data" / "processed" / "trips.parquet")
+SEED = 42
+```
+
+## 分層抽樣
+
+```{python}
+# 每種車種抽相同數量，避免一般車主導結果
+sample = (
+    trips.dropna(subset=["distance_km", "speed_kmh"])
+    .groupby("bike_type", group_keys=False)
+    .sample(n=5000, random_state=SEED)
+)
+features = ["distance_km", "duration_min", "speed_kmh", "hour"]
+```
+
+## 描述統計
+
+```{python}
+sample.groupby("bike_type")[features].describe().T
+```
+
+## 假設檢定
+
+TODO：多變量常態（Mardia 檢定）、共變異數同質（Box's M）。
+
+## MANOVA
+
+```{python}
+from statsmodels.multivariate.manova import MANOVA
+
+manova = MANOVA.from_formula(
+    "distance_km + duration_min + speed_kmh + hour ~ bike_type", data=sample
+)
+print(manova.mv_test())
+```
+
+## LDA／QDA／分類樹
+
+TODO：10-fold cross-validation，報告 balanced accuracy 與混淆矩陣。

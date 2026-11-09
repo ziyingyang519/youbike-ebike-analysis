@@ -1,0 +1,23 @@
+# Core
+pandas>=2.0
+numpy>=1.24
+requests>=2.31
+pyarrow>=14.0           # read/write .parquet
+
+# Multivariate analysis
+scipy>=1.11
+scikit-learn>=1.3       # PCA, K-means, LDA/QDA, trees, cross-validation, CCA
+statsmodels>=0.14       # MANOVA
+factor_analyzer>=0.5    # FA, KMO, Bartlett
+prince>=0.13            # Correspondence analysis (CA)
+
+# Figures and maps
+matplotlib>=3.8
+seaborn>=0.13
+folium>=0.15
+
+# Reports
+jupyter>=1.0            # Quarto runs Python code through Jupyter
+
+# Tests
+pytest>=8.0
