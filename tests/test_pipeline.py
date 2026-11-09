@@ -4,6 +4,8 @@ import pandas as pd
 import pytest
 
 from youbike import (
+    apply_name_fixes,
+    find_question_mark_fixes,
     add_trip_features,
     build_interim,
     day_type,
@@ -113,3 +115,20 @@ def test_add_trip_features():
 
     missing = station_match_report(trips, stations)
     assert "捷運芝山站(2號出口)_1" in set(missing["station"])
+
+
+def test_question_mark_fixes():
+    stations = ["瑠公公園", "福林國小", "士林國小", "公舘承德路口"]
+    trips_names = ["?公公園", "?林國小", "公?承德路口", "龍門廣場"]
+    fixes = find_question_mark_fixes(trips_names, stations)
+    # '?林國小' matches two stations, so it is not fixed
+    assert dict(zip(fixes.raw_name, fixes.fixed_name)) == {
+        "?公公園": "瑠公公園", "公?承德路口": "公舘承德路口"}
+
+    trips = pd.DataFrame({
+        "rent_station": pd.Categorical(["?公公園", "瑠公公園", "龍門廣場"]),
+        "return_station": ["公?承德路口", "龍門廣場", "?林國小"],
+    })
+    out = apply_name_fixes(trips, fixes)
+    assert list(out["rent_station"]) == ["瑠公公園", "瑠公公園", "龍門廣場"]
+    assert list(out["return_station"]) == ["公舘承德路口", "龍門廣場", "?林國小"]

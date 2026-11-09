@@ -67,18 +67,21 @@ def normalize_station_name(name: str) -> str:
 def prepare_stations(raw: pd.DataFrame) -> pd.DataFrame:
     """Turn the real-time station JSON into a tidy station table.
 
-    The JSON has used both `lat`/`lng` and `latitude`/`longitude` over time,
-    so both are accepted. Output columns: name, district, lat, lng, docks.
+    The JSON has used both `lat`/`lng` and `latitude`/`longitude`, and both
+    `total` and `Quantity` for the number of docks, so all are accepted.
+    Output columns: name, district, lat, lng, docks.
     """
     lat_col = "latitude" if "latitude" in raw.columns else "lat"
     lng_col = "longitude" if "longitude" in raw.columns else "lng"
+    # number of docks: 'Quantity' in the 2026 JSON, 'total' in older versions
+    docks_col = next((c for c in ("Quantity", "total") if c in raw.columns), None)
     out = pd.DataFrame(
         {
             "name": raw["sna"].map(normalize_station_name),
             "district": raw.get("sarea"),
             "lat": pd.to_numeric(raw[lat_col], errors="coerce"),
             "lng": pd.to_numeric(raw[lng_col], errors="coerce"),
-            "docks": pd.to_numeric(raw.get("total"), errors="coerce"),
+            "docks": pd.to_numeric(raw[docks_col], errors="coerce") if docks_col else np.nan,
         }
     )
     return out.drop_duplicates("name").reset_index(drop=True)

@@ -74,6 +74,48 @@ def add_trip_features(
     return out
 
 
+def find_question_mark_fixes(trip_names, station_names) -> pd.DataFrame:
+    """Recover station names whose rare characters became '?' in the raw data.
+
+    The raw files write characters such as 瑠, 廍 and 舘 as '?', e.g.
+    '?公公園' is really '瑠公公園'. Each '?' is treated as one unknown
+    character and matched against the station list; a fix is kept only when
+    exactly one station matches.
+
+    Returns a table with columns raw_name, fixed_name.
+    """
+    import re
+
+    station_names = list(pd.unique(pd.Series(station_names).astype(str)))
+    rows = []
+    for name in pd.unique(pd.Series(trip_names).astype(str)):
+        if "?" not in name or name in station_names:
+            continue
+        pattern = re.compile("^" + re.escape(name).replace(r"\?", ".") + "$")
+        hits = [s for s in station_names if pattern.match(s)]
+        if len(hits) == 1:
+            rows.append({"raw_name": name, "fixed_name": hits[0]})
+    return pd.DataFrame(rows, columns=["raw_name", "fixed_name"])
+
+
+def apply_name_fixes(trips: pd.DataFrame, fixes: pd.DataFrame) -> pd.DataFrame:
+    """Rename stations in `rent_station` / `return_station` using a fix table
+    (columns raw_name, fixed_name), e.g. data/reference/station_name_fixes.csv."""
+    mapping = dict(zip(fixes["raw_name"], fixes["fixed_name"]))
+    out = trips.copy()
+    for col in ("rent_station", "return_station"):
+        if isinstance(out[col].dtype, pd.CategoricalDtype):
+            cats = out[col].cat.categories
+            new_cats = [mapping.get(c, c) for c in cats]
+            # renaming can merge two categories, so rebuild from values
+            out[col] = pd.Categorical(
+                np.asarray(new_cats, dtype=object)[out[col].cat.codes.to_numpy()]
+            )
+        else:
+            out[col] = out[col].replace(mapping)
+    return out
+
+
 def station_match_report(trips: pd.DataFrame, stations: pd.DataFrame) -> pd.DataFrame:
     """List rental station names that are missing from the station list,
     with how many trips each one has, so they can be fixed by hand."""

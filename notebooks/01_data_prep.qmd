@@ -12,7 +12,8 @@ ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 sys.path.insert(0, str(ROOT / "src"))
 
 import pandas as pd
-from youbike import load_interim, prepare_stations, add_trip_features, station_match_report
+from youbike import (load_interim, prepare_stations, add_trip_features,
+                     station_match_report, find_question_mark_fixes, apply_name_fixes)
 
 INTERIM = ROOT / "data" / "interim"
 EXTERNAL = ROOT / "data" / "external"
@@ -58,8 +59,23 @@ print(f"站點數：{n_all}，有電輔車借出的站點：{n_ebike}")
 
 站點座標來自 YouBike 2.0 即時資訊，請用瀏覽器存成 `data/external/stations.json`。
 
+原始資料把「瑠、廍、舘」等罕用字寫成「?」，例如「?公公園」其實是「瑠公公園」。先用站點清單比對還原，結果存在 `data/reference/station_name_fixes.csv`（這個檔案會進 git，可以手動補充）。
+
 ```{python}
 stations = prepare_stations(pd.read_json(EXTERNAL / "stations.json"))
+REFERENCE = ROOT / "data" / "reference"
+fixes = find_question_mark_fixes(
+    pd.concat([trips["rent_station"].astype(str), trips["return_station"].astype(str)]).unique(),
+    stations["name"],
+)
+fixes.to_csv(REFERENCE / "station_name_fixes.csv", index=False, encoding="utf-8-sig")
+trips = apply_name_fixes(trips, fixes)
+fixes
+```
+
+剩下對不上的多半是新北市的站點（跨市騎乘），以及已改名或撤除的台北站點。
+
+```{python}
 missing = station_match_report(trips, stations)
 print(f"對不上的站名：{len(missing)} 個，涉及 {missing['n_trips'].sum():,} 筆旅次")
 missing.head(30)
@@ -68,7 +84,7 @@ missing.head(30)
 ## 旅次特徵（以 2026 年 3 月為例）
 
 ```{python}
-march = load_interim(INTERIM, months=["2026-03"])
+march = apply_name_fixes(load_interim(INTERIM, months=["2026-03"]), fixes)
 march_f = add_trip_features(march, stations)
 march_f.groupby("bike_type", observed=True)[["distance_km", "duration_min", "speed_kmh"]].median()
 ```

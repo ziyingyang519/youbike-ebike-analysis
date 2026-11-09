@@ -9,7 +9,9 @@ from .clean import (
 )
 from .features import (
     add_trip_features,
+    apply_name_fixes,
     day_type,
+    find_question_mark_fixes,
     haversine_km,
     station_hour_counts,
     station_match_report,
@@ -22,7 +24,9 @@ __all__ = [
     "normalize_station_name",
     "prepare_stations",
     "add_trip_features",
+    "apply_name_fixes",
     "day_type",
+    "find_question_mark_fixes",
     "haversine_km",
     "station_hour_counts",
     "station_match_report",

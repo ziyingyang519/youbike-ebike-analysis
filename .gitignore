@@ -4,6 +4,7 @@ data/interim/*
 data/processed/*
 data/external/*
 !data/**/.gitkeep
+# data/reference/ holds small hand-checked tables and IS committed
 
 # Quarto
 /.quarto/
