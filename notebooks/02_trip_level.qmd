@@ -7,30 +7,41 @@ author: "A"
 
 ```{python}
 #| label: setup
+import sys
 from pathlib import Path
-import pandas as pd
 
 ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
-trips = pd.read_parquet(ROOT / "data" / "processed" / "trips.parquet")
+sys.path.insert(0, str(ROOT / "src"))
+
+import pandas as pd
+from youbike import load_interim, prepare_stations, add_trip_features
+
+INTERIM = ROOT / "data" / "interim"
 SEED = 42
 ```
 
 ## 分層抽樣
 
+電輔車只占約 6%，所以每種車各抽相同數量，避免一般車主導結果。
+
 ```{python}
-# 每種車種抽相同數量，避免一般車主導結果
-sample = (
-    trips.dropna(subset=["distance_km", "speed_kmh"])
-    .groupby("bike_type", group_keys=False)
-    .sample(n=5000, random_state=SEED)
-)
-features = ["distance_km", "duration_min", "speed_kmh", "hour"]
+N_PER_TYPE = 5000
+stations = prepare_stations(pd.read_json(ROOT / "data" / "external" / "stations.json"))
+
+parts = []
+for bt in ["ebike", "regular"]:
+    # 先抽 2%，再從中抽固定數量，避免把整年資料讀進記憶體
+    pool = load_interim(INTERIM, bike_type=bt, sample_frac=0.02, seed=SEED)
+    parts.append(pool.sample(n=N_PER_TYPE, random_state=SEED))
+sample = add_trip_features(pd.concat(parts, ignore_index=True), stations)
+sample = sample.dropna(subset=["distance_km", "speed_kmh"])
+features = ["distance_km", "duration_min", "speed_kmh", "rent_hour"]
 ```
 
 ## 描述統計
 
 ```{python}
-sample.groupby("bike_type")[features].describe().T
+sample.groupby("bike_type", observed=True)[features].describe().T
 ```
 
 ## 假設檢定
@@ -43,7 +54,7 @@ TODO：多變量常態（Mardia 檢定）、共變異數同質（Box's M）。
 from statsmodels.multivariate.manova import MANOVA
 
 manova = MANOVA.from_formula(
-    "distance_km + duration_min + speed_kmh + hour ~ bike_type", data=sample
+    "distance_km + duration_min + speed_kmh + rent_hour ~ bike_type", data=sample
 )
 print(manova.mv_test())
 ```

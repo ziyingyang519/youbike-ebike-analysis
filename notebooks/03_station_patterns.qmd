@@ -7,29 +7,39 @@ author: "B"
 
 ```{python}
 #| label: setup
+import sys
 from pathlib import Path
-import pandas as pd
 
 ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
-trips = pd.read_parquet(ROOT / "data" / "processed" / "trips.parquet")
+sys.path.insert(0, str(ROOT / "src"))
+
+import pandas as pd
+from youbike import station_hour_counts
+
+INTERIM = ROOT / "data" / "interim"
 SEED = 42
 ```
 
 ## 建構站點使用矩陣
 
+`station_hour_counts` 一次只讀一個月，可以用整年的資料。結果是長表：站點 × 平日／假日 × 小時 × 車種的借車次數。
+
+```{python}
+counts = station_hour_counts(INTERIM)
+counts.head()
+```
+
 每列一個站點，欄位為平日／假日 × 24 小時的電輔車借車比例。
 
 ```{python}
-ebike_share = (
-    trips.assign(is_ebike=trips["bike_type"].eq("ebike"))
-    .groupby(["rent_station", "day_type", "hour"])["is_ebike"]
-    .mean()
-    .unstack(["day_type", "hour"])
-)
+wide = counts.pivot_table(index=["rent_station", "day_type", "rent_hour"],
+                          columns="bike_type", values="n", fill_value=0, observed=True)
+wide["ebike_share"] = wide["ebike"] / (wide["ebike"] + wide["regular"])
+ebike_share = wide["ebike_share"].unstack(["day_type", "rent_hour"])
 ebike_share.shape
 ```
 
-TODO：排除借車量太少的站點，處理缺值。
+TODO：排除借車量太少的站點（例如一年少於 1,000 次）與非一般站點（例如「客服中心」），處理缺值。
 
 ## PCA
 

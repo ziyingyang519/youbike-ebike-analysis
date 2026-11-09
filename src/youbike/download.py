@@ -80,7 +80,9 @@ def download_month(month: str, raw_dir: str | Path = "data/raw") -> list[Path]:
         for name in zf.namelist():
             if not name.lower().endswith(".csv"):
                 continue
-            target = raw_dir / f"{month}_{Path(name).name}"
+            # Same naming as the files already in data/raw: rawdata_YYYYMM.csv
+            suffix = "" if len(out_paths) == 0 else f"_{len(out_paths)}"
+            target = raw_dir / f"rawdata_{month.replace('-', '')}{suffix}.csv"
             target.write_bytes(zf.read(name))
             out_paths.append(target)
     return out_paths

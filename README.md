@@ -15,10 +15,13 @@
 │   ├── 03_station_patterns.qmd 站點型態：PCA、分群、MDS、CA（B）
 │   └── 04_geography_cca.qmd    地理條件：CCA、地圖（C）
 ├── src/youbike/           共用程式：下載、清理、特徵計算
-├── scripts/download_data.py
+├── scripts/
+│   ├── download_data.py   下載原始資料
+│   └── prepare_data.py    清理原始資料，存成 parquet
 ├── tests/                 測試
 ├── data/                  資料（不放進 git）
-│   ├── raw/               原始租借紀錄
+│   ├── raw/               原始租借紀錄（rawdata_YYYYMM.csv）
+│   ├── interim/           清理後的每月資料（trips_YYYYMM.parquet）
 │   ├── external/          站點資訊、地形、日曆
 │   └── processed/         清理後的資料
 ├── figures/
@@ -36,7 +39,8 @@ python -m venv .venv
 source .venv/bin/activate          # Windows：.venv\Scripts\activate
 pip install -r requirements.txt
 
-python scripts/download_data.py --month 2026-03   # 下載一個月的資料
+python scripts/download_data.py --month 2026-03   # 下載一個月的資料（或手動放到 data/raw/rawdata_YYYYMM.csv）
+python scripts/prepare_data.py                     # 清理每個月並存成 data/interim/trips_YYYYMM.parquet
 pytest                                             # 確認程式正常
 quarto preview                                     # 預覽網站
 ```
@@ -61,6 +65,20 @@ Colab 不能直接開 `.qmd`。在 Colab 試寫程式沒問題，但最後要把
 3. 資料不放進 git，每個人用 `scripts/download_data.py` 自己下載。
 4. 固定亂數種子 `SEED = 42`。
 5. 使用 AI 時記錄在 `AI_DISCLOSURE.md`。
+
+## 讀取資料
+
+原始資料每個月約 700–900 萬筆（0.5–0.9 GB），不要直接用 `pd.read_csv` 讀整個檔案。先執行 `scripts/prepare_data.py`，之後在分析檔中：
+
+```python
+from youbike import load_interim, station_hour_counts
+
+march = load_interim("data/interim", months=["2026-03"])                  # 一個月，不到 1 秒
+ebike = load_interim("data/interim", bike_type="ebike", sample_frac=0.05)  # 整年電輔車的 5% 抽樣
+counts = station_hour_counts("data/interim")                               # 整年的站點 × 時段借車次數
+```
+
+清理規則：刪除缺漏資料、騎乘超過 240 分鐘的紀錄、同站借還且少於 1 分鐘的紀錄。各月刪除筆數記錄在 `data/interim/cleaning_report.csv`。
 
 ## 資料說明
 
