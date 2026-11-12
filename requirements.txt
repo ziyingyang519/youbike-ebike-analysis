@@ -17,7 +17,8 @@ seaborn>=0.13
 folium>=0.15
 
 # Reports
-jupyter>=1.0            # Quarto runs Python code through Jupyter
+jupyter>=1.0            # VS Code interactive window and Quarto both run Python through Jupyter
+ipykernel>=6.0
 
 # Tests
 pytest>=8.0

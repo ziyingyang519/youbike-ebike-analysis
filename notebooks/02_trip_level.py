@@ -1,12 +1,13 @@
----
-title: "02 旅次分析：電輔車與一般車"
-author: "A"
----
+# %% [markdown]
+# ---
+# title: "02 旅次分析：電輔車與一般車"
+# author: "A"
+# ---
 
-研究問題 1：電輔車和一般車的旅次特徵是否顯著不同？哪些特徵最能區分兩者？
+# %% [markdown]
+# 研究問題 1：電輔車和一般車的旅次特徵是否顯著不同？哪些特徵最能區分兩者？
 
-```{python}
-#| label: setup
+# %%
 import sys
 from pathlib import Path
 
@@ -18,13 +19,13 @@ from youbike import load_interim, prepare_stations, add_trip_features
 
 INTERIM = ROOT / "data" / "interim"
 SEED = 42
-```
 
-## 分層抽樣
+# %% [markdown]
+# ## 分層抽樣
+#
+# 電輔車只占約 6%，所以每種車各抽相同數量，避免一般車主導結果。
 
-電輔車只占約 6%，所以每種車各抽相同數量，避免一般車主導結果。
-
-```{python}
+# %%
 N_PER_TYPE = 5000
 stations = prepare_stations(pd.read_json(ROOT / "data" / "external" / "stations.json"))
 
@@ -36,29 +37,29 @@ for bt in ["ebike", "regular"]:
 sample = add_trip_features(pd.concat(parts, ignore_index=True), stations)
 sample = sample.dropna(subset=["distance_km", "speed_kmh"])
 features = ["distance_km", "duration_min", "speed_kmh", "rent_hour"]
-```
 
-## 描述統計
+# %% [markdown]
+# ## 描述統計
 
-```{python}
+# %%
 sample.groupby("bike_type", observed=True)[features].describe().T
-```
 
-## 假設檢定
+# %% [markdown]
+# ## 假設檢定
+#
+# TODO：多變量常態（Mardia 檢定）、共變異數同質（Box's M）。
+#
+# ## MANOVA
 
-TODO：多變量常態（Mardia 檢定）、共變異數同質（Box's M）。
-
-## MANOVA
-
-```{python}
+# %%
 from statsmodels.multivariate.manova import MANOVA
 
 manova = MANOVA.from_formula(
     "distance_km + duration_min + speed_kmh + rent_hour ~ bike_type", data=sample
 )
 print(manova.mv_test())
-```
 
-## LDA／QDA／分類樹
-
-TODO：10-fold cross-validation，報告 balanced accuracy 與混淆矩陣。
+# %% [markdown]
+# ## LDA／QDA／分類樹
+#
+# TODO：10-fold cross-validation，報告 balanced accuracy 與混淆矩陣。

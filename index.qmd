@@ -15,10 +15,10 @@ subtitle: "探索式多變量資料分析 期末專題"
 
 | 章節 | 內容 | 負責 |
 |---|---|---|
-| [資料整理](notebooks/01_data_prep.qmd) | 下載、清理、站名比對、旅次特徵 | A |
-| [旅次分析](notebooks/02_trip_level.qmd) | MANOVA、LDA／QDA／分類樹 | A |
-| [站點型態](notebooks/03_station_patterns.qmd) | PCA、分群、MDS、CA | B |
-| [地理條件](notebooks/04_geography_cca.qmd) | 地形、捷運距離、CCA、地圖 | C |
+| [資料整理](notebooks/01_data_prep.py) | 下載、清理、站名比對、旅次特徵 | A |
+| [旅次分析](notebooks/02_trip_level.py) | MANOVA、LDA／QDA／分類樹 | A |
+| [站點型態](notebooks/03_station_patterns.py) | PCA、分群、MDS、CA | B |
+| [地理條件](notebooks/04_geography_cca.py) | 地形、捷運距離、CCA、地圖 | C |
 
 ## 資料來源
 

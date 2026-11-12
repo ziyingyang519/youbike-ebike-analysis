@@ -7,13 +7,13 @@
 ## 專案結構
 
 ```
-├── _quarto.yml            Quarto 網站設定（輸出到 docs/，給 GitHub Pages 用）
+├── _quarto.yml            Quarto 設定（繳交時產生報告用）
 ├── index.qmd              專題首頁
-├── notebooks/
-│   ├── 01_data_prep.qmd        資料整理（A）
-│   ├── 02_trip_level.qmd       旅次分析：MANOVA、LDA／QDA／分類樹（A）
-│   ├── 03_station_patterns.qmd 站點型態：PCA、分群、MDS、CA（B）
-│   └── 04_geography_cca.qmd    地理條件：CCA、地圖（C）
+├── notebooks/             分析檔（VS Code 的 Python 檔，用 # %% 分格）
+│   ├── 01_data_prep.py         資料整理
+│   ├── 02_trip_level.py        旅次分析：MANOVA、LDA／QDA／分類樹（A）
+│   ├── 03_station_patterns.py  站點型態：PCA、分群、MDS、CA（B）
+│   └── 04_geography_cca.py     地理條件：FA、CCA、地圖（C）
 ├── src/youbike/           共用程式：下載、清理、特徵計算
 ├── scripts/
 │   ├── download_data.py   下載原始資料
@@ -42,25 +42,30 @@ pip install -r requirements.txt
 python scripts/download_data.py --month 2026-03   # 下載一個月的資料（或手動放到 data/raw/rawdata_YYYYMM.csv）
 python scripts/prepare_data.py                     # 清理每個月並存成 data/interim/trips_YYYYMM.parquet
 pytest                                             # 確認程式正常
-quarto preview                                     # 預覽網站
 ```
 
-需要另外安裝 [Quarto](https://quarto.org/docs/get-started/)。
+組員不需要自己下載和清理原始資料：清理好的 `trips_*.parquet` 與 `stations.json` 在共用雲端資料夾，分別放到 `data/interim/` 和 `data/external/` 即可。
 
-### 在 Google Colab
+### 用 VS Code 寫分析
 
-```python
-!git clone <repo 網址>
-%cd youbike-ebike-analysis
-!pip install -q -r requirements.txt
-!python scripts/download_data.py --month 2026-03
+1. 安裝 VS Code 擴充套件「Python」和「Jupyter」（Microsoft）。
+2. 用 VS Code 開啟整個專案資料夾（不是單一檔案），右下角選擇剛才安裝套件的 Python 環境。
+3. 打開 `notebooks/` 裡自己負責的 `.py` 檔。檔案用 `# %%` 分成一格一格：點格子上方的「Run Cell」或按 `Shift+Enter`，結果會顯示在右邊的互動視窗，用法跟 Jupyter 一樣。`# %% [markdown]` 開頭的格子是文字說明。
+4. 也可以整份執行：`python notebooks/02_trip_level.py`
+
+### 關於課程規定的 Quarto
+
+課綱規定程式碼要交「可執行的 Quarto notebook」。Quarto 可以直接讀取用 `# %%` 分格的 Python 檔，所以平常只用 VS Code 寫 `.py`，繳交時再安裝 [Quarto](https://quarto.org/docs/get-started/) 執行：
+
+```bash
+quarto render notebooks/02_trip_level.py   # 產生該分析檔的 HTML 報告
 ```
 
-Colab 不能直接開 `.qmd`。在 Colab 試寫程式沒問題，但最後要把程式碼貼回對應的 `.qmd` 檔，才符合課程繳交要求。
+第一次繳交前要先試一次，確認可以順利產生報告。
 
 ## 協作規則
 
-1. 每個人只改自己負責的 `.qmd` 檔，避免衝突。
+1. 每個人只改自己負責的 `.py` 分析檔，避免衝突。
 2. 共用的函式放在 `src/youbike/`，修改前先在群組說一聲，並跑一次 `pytest`。
 3. 資料不放進 git，每個人用 `scripts/download_data.py` 自己下載。
 4. 固定亂數種子 `SEED = 42`。

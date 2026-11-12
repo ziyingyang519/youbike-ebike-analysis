@@ -1,0 +1,6 @@
+{
+  "python.analysis.extraPaths": ["src"],
+  "jupyter.notebookFileRoot": "${workspaceFolder}",
+  "jupyter.interactiveWindow.textEditor.executeSelection": true,
+  "files.encoding": "utf8"
+}

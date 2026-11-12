@@ -3,7 +3,7 @@ project:
   output-dir: docs          # GitHub Pages serves this folder
   render:
     - index.qmd
-    - notebooks/*.qmd
+    - notebooks/*.py      # VS Code percent-format scripts (# %% cells)
 
 website:
   title: "YouBike 電輔車與一般車使用差異"
@@ -11,13 +11,13 @@ website:
     left:
       - href: index.qmd
         text: 首頁
-      - href: notebooks/01_data_prep.qmd
+      - href: notebooks/01_data_prep.py
         text: 資料整理
-      - href: notebooks/02_trip_level.qmd
+      - href: notebooks/02_trip_level.py
         text: 旅次分析
-      - href: notebooks/03_station_patterns.qmd
+      - href: notebooks/03_station_patterns.py
         text: 站點型態
-      - href: notebooks/04_geography_cca.qmd
+      - href: notebooks/04_geography_cca.py
         text: 地理條件
     right:
       - href: AI_DISCLOSURE.md
