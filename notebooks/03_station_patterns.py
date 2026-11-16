@@ -15,18 +15,17 @@ ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 sys.path.insert(0, str(ROOT / "src"))
 
 import pandas as pd
-from youbike import station_hour_counts
+from youbike import station_hour_counts, STUDY_MONTHS, SEED
 
 INTERIM = ROOT / "data" / "interim"
-SEED = 42
 
 # %% [markdown]
 # ## 建構站點使用矩陣
 #
-# `station_hour_counts` 一次只讀一個月，可以用整年的資料。結果是長表：站點 × 平日／假日 × 小時 × 車種的借車次數。
+# 研究期間為 2026 年 3–6 月（`STUDY_MONTHS`）。`station_hour_counts` 一次只讀一個月，結果是長表：站點 × 平日／假日 × 小時 × 車種的借車次數。
 
 # %%
-counts = station_hour_counts(INTERIM)
+counts = station_hour_counts(INTERIM, months=STUDY_MONTHS)
 counts.head()
 
 # %% [markdown]

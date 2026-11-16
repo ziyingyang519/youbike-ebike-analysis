@@ -1,5 +1,7 @@
 """Utilities for the YouBike e-bike vs. regular bike project."""
 
+from .config import SEED, STUDY_MONTHS
+
 from .clean import (
     build_interim,
     load_interim,
@@ -18,6 +20,8 @@ from .features import (
 )
 
 __all__ = [
+    "SEED",
+    "STUDY_MONTHS",
     "build_interim",
     "load_interim",
     "load_rentals",

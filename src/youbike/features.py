@@ -27,10 +27,14 @@ def day_type(dates, holidays: set | None = None) -> pd.Series:
     workdays can be handled by passing `workdays` in a later version.
     """
     dates = pd.to_datetime(pd.Series(dates))
-    off = dates.dt.dayofweek >= 5
+    off = (dates.dt.dayofweek >= 5).to_numpy()
     if holidays:
-        off = off | dates.dt.date.isin(holidays)
-    return pd.Series(np.where(off, "holiday", "weekday"), index=dates.index, dtype="category")
+        hol = pd.to_datetime(sorted(holidays))
+        off = off | dates.dt.normalize().isin(hol).to_numpy()
+    # Build the categorical from integer codes: no per-row strings, so this stays
+    # light even for millions of rides.
+    cat = pd.Categorical.from_codes(off.astype("int8"), categories=["weekday", "holiday"])
+    return pd.Series(cat, index=dates.index)
 
 
 def add_trip_features(
@@ -151,10 +155,15 @@ def station_hour_counts(
         df = load_interim(interim_dir, months=[f"{m[:4]}-{m[4:]}"],
                           columns=["date", "rent_station", "rent_hour", "bike_type"])
         df["day_type"] = day_type(df["date"], holidays).to_numpy()
-        df["rent_station"] = df["rent_station"].astype(str)
-        parts.append(
-            df.groupby(["rent_station", "day_type", "rent_hour", "bike_type"],
-                       observed=True).size().rename("n")
-        )
-    total = pd.concat(parts).groupby(level=[0, 1, 2, 3], observed=True).sum()
+        part = (df.groupby(["rent_station", "day_type", "rent_hour", "bike_type"],
+                           observed=True).size().rename("n").reset_index())
+        # Station names stay categorical while grouping (cheap); convert only the
+        # small grouped table to text so months with different categories combine.
+        part["rent_station"] = part["rent_station"].astype(str)
+        part["day_type"] = part["day_type"].astype(str)
+        part["bike_type"] = part["bike_type"].astype(str)
+        parts.append(part)
+        del df
+    total = (pd.concat(parts, ignore_index=True)
+               .groupby(["rent_station", "day_type", "rent_hour", "bike_type"])["n"].sum())
     return total.reset_index()

@@ -15,15 +15,14 @@ ROOT = Path.cwd().parent if Path.cwd().name == "notebooks" else Path.cwd()
 sys.path.insert(0, str(ROOT / "src"))
 
 import pandas as pd
-from youbike import load_interim, prepare_stations, add_trip_features
+from youbike import load_interim, prepare_stations, add_trip_features, STUDY_MONTHS, SEED
 
 INTERIM = ROOT / "data" / "interim"
-SEED = 42
 
 # %% [markdown]
 # ## 分層抽樣
 #
-# 電輔車只占約 6%，所以每種車各抽相同數量，避免一般車主導結果。
+# 研究期間為 2026 年 3–6 月（`STUDY_MONTHS`）。電輔車只占約 6%，所以每種車各抽相同數量，避免一般車主導結果。
 
 # %%
 N_PER_TYPE = 5000
@@ -31,8 +30,8 @@ stations = prepare_stations(pd.read_json(ROOT / "data" / "external" / "stations.
 
 parts = []
 for bt in ["ebike", "regular"]:
-    # 先抽 2%，再從中抽固定數量，避免把整年資料讀進記憶體
-    pool = load_interim(INTERIM, bike_type=bt, sample_frac=0.02, seed=SEED)
+    # 先抽 2%，再從中抽固定數量，避免把四個月的資料全部讀進記憶體
+    pool = load_interim(INTERIM, months=STUDY_MONTHS, bike_type=bt, sample_frac=0.02, seed=SEED)
     parts.append(pool.sample(n=N_PER_TYPE, random_state=SEED))
 sample = add_trip_features(pd.concat(parts, ignore_index=True), stations)
 sample = sample.dropna(subset=["distance_km", "speed_kmh"])
