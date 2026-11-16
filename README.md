@@ -11,10 +11,10 @@
 ```
 ├── _quarto.yml            Quarto 設定（繳交時產生報告用）
 ├── index.qmd              專題首頁
-├── notebooks/             分析檔（VS Code 的 Python 檔，用 # %% 分格）
+├── notebooks/             分析檔（.py 用 # %% 分格；.ipynb 是 Jupyter notebook，兩種 VS Code 都能直接執行）
 │   ├── 01_data_prep.py         資料整理
 │   ├── 02_trip_level.py        旅次分析：MANOVA、LDA／QDA／分類樹（A）
-│   ├── 03_station_patterns.py  站點型態：PCA、分群、MDS、CA（B）
+│   ├── 03_station_patterns.ipynb 站點型態：PCA、分群、MDS、CA（B）
 │   └── 04_geography_cca.py     地理條件：FA、CCA、地圖（C）
 ├── src/youbike/           共用程式：下載、清理、特徵計算
 ├── scripts/

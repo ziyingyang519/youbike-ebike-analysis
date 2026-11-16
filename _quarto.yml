@@ -4,6 +4,7 @@ project:
   render:
     - index.qmd
     - notebooks/*.py      # VS Code percent-format scripts (# %% cells)
+    - notebooks/*.ipynb
 
 website:
   title: "YouBike 電輔車與一般車使用差異"
@@ -15,7 +16,7 @@ website:
         text: 資料整理
       - href: notebooks/02_trip_level.py
         text: 旅次分析
-      - href: notebooks/03_station_patterns.py
+      - href: notebooks/03_station_patterns.ipynb
         text: 站點型態
       - href: notebooks/04_geography_cca.py
         text: 地理條件
