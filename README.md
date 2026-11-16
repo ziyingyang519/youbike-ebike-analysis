@@ -4,7 +4,7 @@
 
 **研究問題**：台北 YouBike 2.0 的電輔車，是讓人騎得更遠、去不同的地方，還是只是取代原本的一般車旅次？
 
-**研究期間**：2026 年 3–6 月（2,928 萬趟騎乘、1,771 個站點）。程式中以 `youbike.STUDY_MONTHS` 統一設定。
+**研究期間**：2026 年 3–6 月。全組統一使用「台北市限定」版本：2,794 萬趟騎乘（借、還兩站都在台北市），約 1,720 個借車站。程式中以 `youbike.STUDY_MONTHS` 統一設定。
 
 ## 專案結構
 
@@ -19,7 +19,8 @@
 ├── src/youbike/           共用程式：下載、清理、特徵計算
 ├── scripts/
 │   ├── download_data.py   下載原始資料
-│   └── prepare_data.py    清理原始資料，存成 parquet
+│   ├── prepare_data.py    清理原始資料，存成 parquet
+│   └── convert_taipei_only.py  把組員整理的台北市限定 zip 轉成 parquet
 ├── tests/                 測試
 ├── data/                  資料（不放進 git）
 │   ├── raw/               原始租借紀錄（rawdata_YYYYMM.csv）
@@ -85,7 +86,19 @@ ebike = load_interim("data/interim", bike_type="ebike", sample_frac=0.05)  # 整
 counts = station_hour_counts("data/interim")                               # 整年的站點 × 時段借車次數
 ```
 
-清理規則：刪除缺漏資料、騎乘超過 240 分鐘的紀錄、同站借還且少於 1 分鐘的紀錄。各月刪除筆數記錄在 `data/interim/cleaning_report.csv`。
+清理規則：刪除缺漏資料、騎乘超過 240 分鐘的紀錄、同站借還且少於 1 分鐘的紀錄。之後再篩選「借車站與還車站都能唯一對應到台北市站點」的旅次（約刪除 4.6%，規則見 `data/reference/taipei_only_README.txt`），並加上借、還車站經緯度欄位。
+
+### 台北市限定資料（目前使用的版本）
+
+1. 從共用雲端資料夾下載 `trips_YYYYMM_taipei_only_coordinates_csv_NN.zip`（2026/03–06），放到 `data/raw/taipei_only_zips/`。
+2. 執行 `python scripts/convert_taipei_only.py`，產生 `data/interim/trips_YYYYMM.parquet`，並在 `data/interim/taipei_only_check.csv` 記錄筆數與 SHA-256 檢查結果。
+
+| 月份 | 旅次數 | 借車站數 | 電輔車比例 |
+|---|---|---|---|
+| 2026-03 | 7,318,269 | 1,697 | 5.9% |
+| 2026-04 | 6,909,332 | 1,703 | 5.9% |
+| 2026-05 | 7,677,824 | 1,706 | 6.3% |
+| 2026-06 | 6,032,659 | 1,717 | 6.5% |
 
 ## 資料說明
 
