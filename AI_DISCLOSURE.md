@@ -8,6 +8,8 @@
 | 2026-11-09 | Sharon | Claude | 建立專案架構與資料清理程式（`src/youbike/`） | 「幫我開一個程式專案」 | 以實際資料欄位建立測試（`tests/`），並人工檢查輸出 |
 | 2026-11-09 至 11-11 | Sharon | Claude | 改寫讀取程式（分批讀取、parquet）、站名比對、資料說明 PDF、CP#1 投影片 | 「幫我改寫讀取程式」「把這些寫成 pdf」「開始準備 CP#1 投影片」 | 以 2026 年 3 月實際資料核對筆數與中位數；投影片數字逐一對照程式輸出 |
 | 2026-11-12 | Sharon | Claude | 分析檔由 .qmd 改為 VS Code 的 .py（`# %%` 分格），降低 01 的記憶體用量 | 「我們不要寫 qmd 檔了，都用 VS Code 寫 python」 | 在本機實際執行 01–04，確認結果與修改前一致 |
+| 2026-11-17 | Sharon | Claude（Claude Code） | B 部分（`03_station_patterns.ipynb`）：撰寫步驟 3 分群與 MDS、步驟 4 對應分析的程式與結果解讀；檢查第 4 群 23 時高峰是否為資料問題。詳見 notebook 最後的「AI 使用紀錄」 | 「直接開始寫步驟 3 的分群程式」「繼續」（步驟 4）；23 時高峰原因「不知道」→ 由 AI 調查 | 整份 notebook 從頭執行無錯誤；以輪廓係數與 bootstrap 檢查分群穩定度；23 時高峰回到旅次資料檢查日期、站點、異常旅次與月份；Sharon 檢視並同意分群變數、K = 5、臺大公館校區併入大安區、保留停用站 |
+| 2026-11-17 | Sharon | Claude（Claude Code） | 執行 notebook（改用 nbclient、安裝 pyarrow）、以 Quarto 產生 03 的 HTML 報告、git commit 與 push | 「跑這個 ipynb 檔」「commit 並 push」「做 1.」（Quarto 測試） | 確認報告中 14 張圖、表格與公式都正常顯示；每次 push 前確認遠端沒有其他組員的新 commit，且只提交 03 與 `.gitignore` |
 
 ## 原則
 
