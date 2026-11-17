@@ -27,8 +27,7 @@
 │   ├── interim/           清理後的每月資料（trips_YYYYMM.parquet）
 │   ├── external/          站點資訊、地形、日曆
 │   └── processed/         清理後的資料
-├── figures/
-└── AI_DISCLOSURE.md       AI 使用聲明
+└── figures/
 ```
 
 ## 開始使用
@@ -72,7 +71,6 @@ quarto render notebooks/02_trip_level.py   # 產生該分析檔的 HTML 報告
 2. 共用的函式放在 `src/youbike/`，修改前先在群組說一聲，並跑一次 `pytest`。
 3. 資料不放進 git，每個人用 `scripts/download_data.py` 自己下載。
 4. 固定亂數種子 `SEED = 42`。
-5. 使用 AI 時記錄在 `AI_DISCLOSURE.md`。
 
 ## 讀取資料
 

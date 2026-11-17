@@ -20,9 +20,6 @@ website:
         text: 站點型態
       - href: notebooks/04_geography_cca.py
         text: 地理條件
-    right:
-      - href: AI_DISCLOSURE.md
-        text: AI 使用聲明
 
 format:
   html:
